@@ -1,3 +1,6 @@
 .venv/
 logs/
 __pycache__/
+*.pyc
+
+#*setenv.py*
