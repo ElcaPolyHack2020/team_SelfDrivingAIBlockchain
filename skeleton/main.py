@@ -4,7 +4,11 @@ import xml.etree.ElementTree as ET
 import random
 import csv
 
+import utils
+
 from setenv import *
+
+from models import Person
 
 set_env()
 
@@ -81,7 +85,8 @@ def clean_logs(logs_folder: str, sumo_log_file: str, traci_log_file: str, delete
     
 
 def start_traci_simulation(sumocfg_file: str, sumo_log_file: str, traci_log_file: str):
-    sumoBinary = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo-gui')
+    cmd = 'sumo-gui' if utils.DEBUG_MODE else 'sumo'
+    sumoBinary = os.path.join(os.environ['SUMO_HOME'], 'bin', cmd)
     sumoCmd = [sumoBinary, "-c", sumocfg_file, "--log", sumo_log_file]
     traci.start(sumoCmd, traceFile=traci_log_file)
 
@@ -168,15 +173,6 @@ def parse_pedestrian_weights():
 
     return pedestrian_weights
 
-class Person:
-    # init method or constructor
-    def __init__(self, id: str, edge_from: str, edge_to: str, position_from: float, position_to: float, depart: float):
-        self.id = id
-        self.edge_from = edge_from
-        self.edge_to = edge_to
-        self.position_from = position_from
-        self.position_to = position_to
-        self.depart = depart
 
 class PedestrianWeight:
     # init method or constructor
