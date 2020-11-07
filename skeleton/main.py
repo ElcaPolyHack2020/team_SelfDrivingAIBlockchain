@@ -4,9 +4,13 @@ import xml.etree.ElementTree as ET
 import random
 import csv
 
-#SUMO_HOME
-os.environ["SUMO_HOME"] = r"C:\Temp\sumo-win64-git\sumo-git"
+from setenv import *
 
+set_env()
+
+#SUMO_HOME
+#os.environ["SUMO_HOME"] = r"C:\Temp\sumo-win64-git\sumo-git"
+os.environ["SUMO_HOME"] = r"C:\Program Files (x86)\Eclipse\Sumo"
 # Add the traci python library to the tools path
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
