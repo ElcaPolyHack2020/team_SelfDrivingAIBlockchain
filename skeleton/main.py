@@ -3,6 +3,7 @@ import sys
 import xml.etree.ElementTree as ET
 import random
 import csv
+import code
 
 from setenv import *
 
@@ -81,7 +82,7 @@ def clean_logs(logs_folder: str, sumo_log_file: str, traci_log_file: str, delete
     
 
 def start_traci_simulation(sumocfg_file: str, sumo_log_file: str, traci_log_file: str):
-    sumoBinary = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo-gui')
+    sumoBinary = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo')
     sumoCmd = [sumoBinary, "-c", sumocfg_file, "--log", sumo_log_file]
     traci.start(sumoCmd, traceFile=traci_log_file)
 

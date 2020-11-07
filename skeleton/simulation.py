@@ -4,6 +4,7 @@ from time import sleep
 import sys
 import traci
 import traci.constants as tc
+import code
 
 class Simulation:
     def __init__(self, simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge):
@@ -29,8 +30,6 @@ class Simulation:
         traci.vehicle.changeTarget(bus_id,self.bus_depot_end_edge)
         print(self.getDist(123,123, traci.vehicle.getRoute(bus_id)))
        
-
-        return
         # traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge, person.edge_from,person.edge_to])
         # print(traci.vehicle.getRoute(bus_id))
         # traci.vehicle.changeTarget(bus_id, person.edge_from)
@@ -54,6 +53,7 @@ class Simulation:
             traci.simulationStep()
             #dist.append(traci.vehicle.getDistance(bus_id))
             #drivingDist2D.append(traci.vehicle.getDrivingDistance2D(bus_id,person.edge_from,person.position_from))
+            code.interact(local=locals()) # Press CTR+Z + Enter to get back to the running
             try:
                 print('{} - {}'.format(step, traci.vehicle.getDrivingDistance(bus_id,person.edge_from,person.position_from)))
             except :
