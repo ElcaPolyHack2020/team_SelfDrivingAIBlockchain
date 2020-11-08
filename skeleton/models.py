@@ -16,7 +16,7 @@ class Bus:
         self.going_to_dropoff = False
         traci.vehicle.add(vehID=id, typeID=typeID, routeID="", depart=0, departPos=0, departSpeed=0, departLane=0, personCapacity=self.capacity)
         traci.vehicle.setRoute(id, [utils.BUS_START_EDGE])
-        traci.vehicle.setStop(vehID=self.id, edgeID=utils.BUS_START_EDGE, pos=0.6, laneIndex=0, duration=100, flags=tc.STOP_DEFAULT)
+        traci.vehicle.setStop(vehID=self.id, edgeID=utils.BUS_START_EDGE, pos=0.6, laneIndex=0, duration=300, flags=tc.STOP_DEFAULT)
 
     def distance_to(self, p):
         bus_id = 'test_bus'
@@ -38,12 +38,21 @@ class Bus:
 
         print("####################### Setting new route to ", str(person.id) )
 
+        #split = traci.vehicle.getRoute(self.id)[-1].split("#")
+        #edge = int(split[0])
+        
+        #traci.vehicle.setRoute(self.id, [edge + str(-int(1 - edge))])
+        #traci.vehicle.changeTarget(self.id, str(-edge)+"#"+split[1])
+
         if pickup:
             traci.vehicle.changeTarget(self.id,person.edge_from)
             traci.vehicle.setStop(vehID=self.id, edgeID=person.edge_from, pos=person.position_from, laneIndex=0, duration=utils.STOP_TIME, flags=tc.STOP_DEFAULT)
         else:
             traci.vehicle.changeTarget(self.id, person.edge_to)
             traci.vehicle.setStop(vehID=self.id, edgeID=person.edge_to, pos=person.position_to, laneIndex=0, duration=utils.STOP_TIME, flags=tc.STOP_DEFAULT)
+        print("asdfasdfasdfasdfasdfasdfsadf")
+        print(traci.vehicle.getRoute(self.id))
+
 
     def just_stopped(self, step_nbr):
         window_buffer = 55 if self.going_to_dropoff else 0
@@ -56,15 +65,18 @@ class Bus:
     def pickup(self):
         traci.vehicle.changeTarget(self.id, self.next_destination.edge_to)
         traci.vehicle.setStop(vehID=self.id, edgeID=self.next_destination.edge_to, pos=self.next_destination.position_to, laneIndex=0, duration=utils.STOP_TIME, flags=tc.STOP_DEFAULT)
-        if utils.DEBUG_MODE:
-            print("Marius's pickup stop")
-            code.interact(local=locals())
-        traci.simulationStep()
+        #if utils.DEBUG_MODE:
+        #    print("Marius's pickup stop")
+        #    code.interact(local=locals())
+        #traci.simulationStep()
 
     def dropoff(self):
+        #traci.vehicle.changeTarget(self.id, utils.BUS_STOP_EDGE)
+        #traci.vehicle.setStop(vehID=self.id, edgeID=utils.BUS_STOP_EDGE, pos=0.1, laneIndex=0, duration=utils.STOP_TIME, flags=tc.STOP_DEFAULT)
+        #traci.simulationStep()
         if utils.DEBUG_MODE:
             print("Marius's drop stop !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            code.interact(local=locals())
+            #code.interact(local=locals())
 
         #traci.vehicle.setRoute(self.id, [utils.BUS_START_EDGE])
         
@@ -130,6 +142,7 @@ class Person:
         self.position_to = position_to
         self.depart = depart    
         self.is_dropped_off = False
+        self.is_picked_up = False
 
 class Pedestrian(Person):
     def __init__(self, id, edge_from, edge_to, position_from, position_to, depart):
@@ -183,13 +196,17 @@ class Director:
 
     def step(self):
         try:
+            if self.step_nbr == 2067 or self.step_nbr == 2068:
+                print("Stopping at step ", self.step_nbr)
+                code.interact(local=locals())
+
 
             self.ensure_events()
-
+  
             self.handle_new_people(self.new_people_waiting())
-
+            
             self.route_to_new_dest(self.update_buses_with_event())
-
+         
             self.step_nbr += 1
             return 1
         except Exception as e:
@@ -247,10 +264,15 @@ class Director:
         for p in self.pedestrians:
             #if p.depart < self.step_nbr and not p.has_been_on_a_bus and p.is_waiting:
             if p.depart < self.step_nbr:
+                
                 if p.is_waiting:
+                   
                     if p.picked_up():
+                        
                         p.assigned_bus.onboard.append(p)
                         ret.append(p.assigned_bus)
+                
+                    
                 elif not p.is_dropped_off:
                     if p.droped_off():
                         print("#################################################")
@@ -261,13 +283,13 @@ class Director:
         return ret
 
     def route_to_new_dest(self, buses_to_be_routed):
-
+        
         for bus in buses_to_be_routed:
-
-            closest_next, _, will_be_pickup = bus.select_next(self.unassigned, True)
             
+            closest_next, _, will_be_pickup = bus.select_next(self.unassigned, True)
+           
             if closest_next:
-
+               
                 if will_be_pickup:
                     closest_next.assigned_bus = bus
                     self.unassigned.remove(closest_next)

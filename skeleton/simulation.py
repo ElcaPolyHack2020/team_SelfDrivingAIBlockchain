@@ -6,6 +6,7 @@ import code
 from models import Bus, Pedestrian, Director
 import utils
 
+from BusN import BusN
 class Simulation:
     def __init__(self, simulation_steps, sleep_time, pedestrians, bus_depot_start_edge, bus_depot_end_edge):
         self.simulation_steps = simulation_steps
@@ -22,6 +23,8 @@ class Simulation:
                 waiting.append(ped)
         #print(waiting)
         return waiting
+
+
 
     def run1(self):
         current_time = 0
@@ -74,7 +77,8 @@ class Simulation:
 
 
 
-    def run(self):
+    def run2(self):
+        for i in range(300): traci.simulationStep()
         # Create a bus for the persons
         nbr_buses = 1
         buses_list = []
@@ -113,3 +117,30 @@ class Simulation:
             #print(traci.vehicle.getSubscriptionResults('bus_0'))
 
         traci.close()
+
+
+    
+
+
+    def run(self):
+        nbr_of_busses = 5
+        
+        for i in range(500): traci.simulationStep()
+        current_step = 500
+
+        busses = []
+        for j in range(nbr_of_busses):
+            busses.append(BusN(str('asdf'+str(j)), self.pedestrians, current_step))
+
+
+        while(current_step <= self.simulation_steps):
+            for bus in busses:
+                for i in range(10): traci.simulationStep()
+                current_step+= 10
+                current_step += bus.update(current_step)
+            
+
+
+    
+        traci.close()
+
