@@ -148,8 +148,8 @@ def generate_random_people(seed: int, scale_factor: float, net_xml_file: str, ma
             len1 = float(edge1.findall('./lane')[0].attrib['length'])
             len2 = float(edge2.findall('./lane')[0].attrib['length'])
 
-            pos1 = random.uniform(len1 * 1, len1 *1)
-            pos2 = random.uniform(len2 * 1, len2 * 1)
+            pos1 = random.uniform(len1 * 0.4, len1 *0.6)
+            pos2 = random.uniform(len2 * 0.4, len2 * 0.6)
 
             depart = random.uniform(t0, t1)
 

@@ -23,75 +23,93 @@ class Simulation:
         #print(waiting)
         return waiting
 
-    def run(self):
-        current_time = 500
-        for i in range(500):traci.simulationStep()
-
-        for veh_type_id in traci.vehicletype.getIDList():
-            print(veh_type_id)
-            print(traci.vehicletype.getPersonCapacity(veh_type_id))
-
-
+    def run1(self):
+        current_time = 0
         bus_id = "bus1"
-        traci.vehicle.add(vehID=bus_id, typeID="BUS_L", routeID="", depart=0, departPos=0, departSpeed=0, departLane=0, personCapacity=40)
+        for i in range(1800): traci.simulationStep()
+        current_time += 1800
+        
+        traci.vehicle.add(vehID=bus_id, typeID="BUS_S", routeID="", depart=0, departPos=0, departSpeed=0, departLane=0, personCapacity=2)
         traci.vehicle.setRoute(bus_id, [self.bus_depot_start_edge])
-        while current_time < self.simulation_steps:
-            waiting = self.waiting_pedestrians(current_time)
-            if len(waiting) == 0:
-                for i in range(300): traci.simulationStep()
-                current_time += 300
-            else:
-                for person in waiting:
-                    traci.vehicle.changeTarget(vehID=bus_id, edgeID=person.edge_from)
-                    traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_from, pos=person.position_from, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
-                    #wait for driving
-                    while not (traci.vehicle.isStopped(bus_id)):
-                        traci.simulationStep()
-                        current_time += 1
 
-                    traci.vehicle.changeTarget(vehID=bus_id, edgeID=person.edge_to)
-                    traci.vehicle.setStop(vehID=bus_id, edgeID=person.edge_to, pos=person.position_to, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
-                    while traci.vehicle.isStopped(bus_id):
-                        traci.simulationStep()
-                        current_time += 1
-                    #wait for driving
-                    #while not (traci.vehicle.isStopped(bus_id)):
-                    #   traci.simulationStep()
-                    #  current_time += 1
-                    #while t raci.vehicle.isStopped(bus_id):
-                    #    traci.simulationStep()
-                    #    current_time += 1
-                
+        ped = self.pedestrians[0]
+        traci.vehicle.changeTarget(vehID=bus_id, edgeID=ped.edge_from)
+        traci.vehicle.setStop(vehID=bus_id, edgeID=ped.edge_from, pos=ped.position_from, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
 
-                
+        #wait for driving
+        while not (traci.vehicle.isStopped(bus_id)):
+            traci.simulationStep()
+            current_time += 1
 
+        traci.vehicle.changeTarget(vehID=bus_id, edgeID=ped.edge_to)
+        traci.vehicle.setStop(vehID=bus_id, edgeID=ped.edge_to, pos=102.30, laneIndex=0, duration=50, flags=tc.STOP_DEFAULT)
+
+        #wait for waiting
+        while traci.vehicle.isStopped(bus_id):
+            traci.simulationStep()
+            current_time += 1
+
+        
+
+        #wait for driving
+        while not (traci.vehicle.isStopped(bus_id)):
+            traci.simulationStep()
+            current_time += 1
+
+        traci.vehicle.changeTarget(vehID=bus_id, edgeID=self.bus_depot_end_edge)
+
+        #wait for waiting
+        while traci.vehicle.isStopped(bus_id):
+            traci.simulationStep()
+            current_time += 1
+
+        
+        #wait for driving
+        while not (traci.vehicle.isStopped(bus_id)):
+            traci.simulationStep()
+            current_time += 1
+
+
+
+
+
+
+    def run(self):
         # Create a bus for the persons
         nbr_buses = 1
         buses_list = []
         pedestrians_list = []
 
         for i in range(nbr_buses):
-            buses_list.append(Bus(4, "bus_"+str(i)))
+            buses_list.append(Bus(utils.BUS_TYPE_L, "bus_"+str(i)))
 
         for pederasts in self.pedestrians:
             pedestrians_list.append(Pedestrian(pederasts.id, pederasts.edge_from,
                 pederasts.edge_to, pederasts.position_from, pederasts.position_to,
-                pederasts.depart)
+                int(pederasts.depart))
             )
 
-        torantino = Director(pedestrians_list, buses_list)
+        tarantino = Director(pedestrians_list, buses_list)
         
         step = 0
+        interact_period = 400
+
+        #code.interact(local=locals()) # Press CTR+Z + Enter to get back to the running
+        
         while step <= self.simulation_steps:
+            
+            step += tarantino.step()
             traci.simulationStep()
-            torantino.step()
 
             if utils.DEBUG_MODE:
-                code.interact(local=locals()) # Press CTR+Z + Enter to get back to the running
+                if not step % interact_period:
+                    pass
+                    #code.interact(local=locals()) # Press CTR+Z + Enter to get back to the running
                 if self.sleep_time > 0: 
-                    sleep(self.sleep_time)
+                    pass
+                    #sleep(self.sleep_time)
 
-            step += 1
+            #step += 1
             #print(traci.vehicle.getSubscriptionResults('bus_0'))
 
         traci.close()

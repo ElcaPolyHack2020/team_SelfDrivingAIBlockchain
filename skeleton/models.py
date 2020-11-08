@@ -108,9 +108,10 @@ class Bus:
                 closest_next = p_onboard
 
         # Or pick up?
-        if not self.is_full() and len(self.onboard) == 0:
+        #if not self.is_full() and len(self.onboard) == 0:
+        if not self.is_full():
             for p_pickup in new_pickups_candidates:
-                if not p_pickup.assigned_bus:
+                if not p_pickup.assigned_bus or p_pickup.assigned_bus == self:
                     dist = self.distance_to(p_pickup)
                     if not closest_next or dist < closest_distance:
                         closest_distance = dist
